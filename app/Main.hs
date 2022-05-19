@@ -1,8 +1,13 @@
 module Main where
 
-import Lib
-import Control.Monad
+import Lib (mainF)
 
+import System.Environment (getArgs)
 
-
-main = print 123
+main :: IO ()
+main = do
+   args <- getArgs
+   if null args
+      then print "> main <surname>"
+      else mainF (head args) >> print ("Ready. Feedback in" ++ head args ++ "-F.txt")
+                  
