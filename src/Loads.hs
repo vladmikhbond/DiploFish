@@ -1,4 +1,4 @@
-module Load
+module Loads
     ( loadData, loadPerson, loadTemplate, 
       Key, Val
     ) where
@@ -17,9 +17,10 @@ loadData = do
     convert :: [String] -> [(Key, [Val])] -> [(Key, [Val])]
     convert [] res = res
     convert (line : lines) res
-        | take 2 line == "[[" = convert lines  ((line, []) : res)
-        | otherwise = let (k, vals) = head res
-            in convert lines ((k, line : vals) : tail res)
+        | head line == '@' = convert lines  ((tail line, []) : res)
+
+        | otherwise        = let (key, vals) = head res
+            in reverse $ convert lines ((key, line : vals) : tail res)
 
 
 loadPerson :: FilePath -> IO [(Key, Val)]
@@ -31,8 +32,8 @@ loadPerson path = do
     convert [] res = res
     convert (line : lines) res
         | head line == '[' = convert lines  ((line, []) : res)
-        | otherwise = let (k, val) = head res
-            in convert lines ((k, val ++ line) : tail res)
+        | otherwise        = let (key, val) = head res
+            in reverse $ convert lines ((key, val ++ line) : tail res)
 
 
 loadTemplate :: IO String
@@ -45,7 +46,8 @@ readCleanLines path = do
     content <- readFile path
     let ls = lines content
     let ls' = map (dropWhile (==' ')) ls
-    return $ filter (/="") ls'
+    let res  = filter (/="") ls'
+    return res
 
 
 

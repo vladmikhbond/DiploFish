@@ -1,32 +1,32 @@
 module Lib
-    ( 
+    (
     ) where
 
-import System.IO
-import Load
-import Data.Text   
 
-m surname = do
+import Loads ( Val, Key, loadData, loadPerson, loadTemplate )
+import Data.Text ( Text, pack, replace, unpack )
+import Debug.Trace (trace)
+
+mainF surname = do
     doc <- pack <$> loadTemplate
-    dat <- loadData
-    let n = fromEnum (Prelude.head surname)  
-    let doc' = substOneTo (dat!!3) doc n  
-    --
-    let s = unpack doc'
-    writeFile "000.txt" s
-    --return ()
+    dats <- loadData
+    pers <- loadPerson ("data/" ++ surname ++ ".txt")
+    let doc' = doc `subst` dats
 
-substTo :: [(Key, [Val])] -> Text -> Text
-substTo = undefined
+    writeFile ("data/" ++ surname ++ "-F.txt") (unpack doc')
 
-substOneTo :: (Key, [String]) -> Text -> Int -> Text
-substOneTo (_, []) doc _ = doc
-substOneTo (key, vals) doc n =  let
+
+subst :: Text -> [(Key, [Val])] -> Text
+subst = foldl substOne
+
+substOne :: Text -> (Key, [String]) -> Text
+substOne doc (_, []) = doc
+substOne  doc (key, vals)=  let
     keyT = pack key
-    len = Prelude.length vals
-    valT = pack $ vals !! (n `mod` len)
- in
-    replace keyT valT doc
+    len = length vals
+    valT = pack $ head vals
+
+ in replace keyT valT doc
 
 
 
