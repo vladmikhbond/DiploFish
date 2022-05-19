@@ -28,12 +28,7 @@ loadData path = do
         | otherwise        = let (key, vals) = head res
             in reverse $ convert lines ((key, line : vals) : tail res)
 
-loadTemplate :: IO String
-loadTemplate = readFile "data/templateF.txt"
-
-
-
------------- utils ----------------
+loadTemplate = readFile   
 
 
 

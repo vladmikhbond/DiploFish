@@ -1,17 +1,25 @@
 module Lib
     (
-        mainF
+        mainF, mainR
     ) where
 
 import Data.Text ( Text, pack, replace, unpack )
---import Debug.Trace (trace)
 import System.Random ( initStdGen, uniformR, StdGen )
 import Control.Monad (foldM)
 import Loads ( Val, Key, loadData, loadTemplate )
 
-mainF :: [Char] -> IO ()
+mainF, mainR  :: [Char] -> IO ()
+
+mainR surname = do
+    doc <- pack <$> loadTemplate "data/templateR.txt"
+    dats <- loadData "data/dataR.txt"
+    pers <- loadData ("data/" ++ surname ++ ".txt")
+    doc1 <- foldM doOneSubst doc dats    
+    doc2 <- foldM doOneSubst doc1 pers
+    writeFile ("data/" ++ surname ++ "-R.txt") (unpack doc2)
+
 mainF surname = do
-    doc <- pack <$> loadTemplate
+    doc <- pack <$> loadTemplate "data/templateF.txt"
     dats <- loadData "data/dataF.txt"
     pers <- loadData ("data/" ++ surname ++ ".txt")
     doc1 <- foldM doOneSubst doc dats    
