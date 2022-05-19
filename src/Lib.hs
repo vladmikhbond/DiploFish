@@ -1,33 +1,37 @@
 module Lib
     (
+        mainF
     ) where
 
-
-import Loads ( Val, Key, loadData, loadPerson, loadTemplate )
 import Data.Text ( Text, pack, replace, unpack )
-import Debug.Trace (trace)
+--import Debug.Trace (trace)
+import System.Random ( initStdGen, uniformR, StdGen )
+import Control.Monad (foldM)
+import Loads ( Val, Key, loadData, loadTemplate )
 
+mainF :: [Char] -> IO ()
 mainF surname = do
     doc <- pack <$> loadTemplate
-    dats <- loadData
-    pers <- loadPerson ("data/" ++ surname ++ ".txt")
-    let doc' = doc `subst` dats
+    dats <- loadData "data/dataF.txt"
+    pers <- loadData ("data/" ++ surname ++ ".txt")
+    doc1 <- foldM doOneSubst doc dats    
+    doc2 <- foldM doOneSubst doc1 pers
+    writeFile ("data/" ++ surname ++ "-F.txt") (unpack doc2)
 
-    writeFile ("data/" ++ surname ++ "-F.txt") (unpack doc')
+
+doOneSubst :: Text -> (Key, [Val]) -> IO Text
+doOneSubst doc (_, []) = return doc
+doOneSubst  doc (key, vals) = do
+    let keyT = pack key
+    let len = length vals
+    g0 <- initStdGen
+    let (n, g1) = uniformR (0, len-1) g0 :: (Int, StdGen)
+    let valT = pack $ vals !! n
+    let doc' = replace keyT valT doc
+    return doc'
 
 
-subst :: Text -> [(Key, [Val])] -> Text
-subst = foldl substOne
-
-substOne :: Text -> (Key, [String]) -> Text
-substOne doc (_, []) = doc
-substOne  doc (key, vals)=  let
-    keyT = pack key
-    len = length vals
-    valT = pack $ head vals
-
- in replace keyT valT doc
-
+    
 
 
 
